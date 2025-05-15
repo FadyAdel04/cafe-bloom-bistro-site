@@ -49,7 +49,7 @@ export async function getUserOrders(userId: string) {
     const { data, error } = await supabase
       .from('orders')
       .select('*')
-      .eq('user_info->user_id', userId)
+      .eq('user_info->>user_id', userId) // Fix for excessive type instantiation
       .order('created_at', { ascending: false });
     
     if (error) {
