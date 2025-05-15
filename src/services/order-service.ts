@@ -1,13 +1,15 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { Order, CartItem } from "@/types";
+import { Json } from "@/integrations/supabase/types";
 
 // Function to create a new order
 export async function createOrder(items: CartItem[], userInfo?: Order['user_info']): Promise<Order | undefined> {
+  // Convert CartItem[] to a format that Supabase can store as JSON
   const newOrder = {
-    items: items,
+    items: items as unknown as Json,
     status: 'pending' as const,
-    user_info: userInfo
+    user_info: userInfo as unknown as Json
   };
 
   const { data, error } = await supabase
@@ -21,7 +23,11 @@ export async function createOrder(items: CartItem[], userInfo?: Order['user_info
     return undefined;
   }
   
-  return data as Order;
+  // Convert the returned data back to our Order type
+  return {
+    ...data,
+    items: data.items as unknown as CartItem[]
+  } as Order;
 }
 
 // Function to get all orders
@@ -36,7 +42,11 @@ export async function getOrders(): Promise<Order[]> {
     return [];
   }
   
-  return data as Order[];
+  // Convert items from JSON to CartItem[]
+  return data.map(order => ({
+    ...order,
+    items: order.items as unknown as CartItem[]
+  })) as Order[];
 }
 
 // Function to get an order by id
@@ -52,7 +62,13 @@ export async function getOrderById(id: string): Promise<Order | undefined> {
     return undefined;
   }
   
-  return data as Order;
+  if (!data) return undefined;
+  
+  // Convert items from JSON to CartItem[]
+  return {
+    ...data,
+    items: data.items as unknown as CartItem[]
+  } as Order;
 }
 
 // Function to update an order status
@@ -69,5 +85,9 @@ export async function updateOrderStatus(id: string, status: Order['status']): Pr
     return undefined;
   }
   
-  return data as Order;
+  // Convert items from JSON to CartItem[]
+  return {
+    ...data,
+    items: data.items as unknown as CartItem[]
+  } as Order;
 }

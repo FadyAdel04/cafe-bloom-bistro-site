@@ -1,16 +1,25 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import CategoryFilter from '@/components/menu/CategoryFilter';
 import MenuItem from '@/components/menu/MenuItem';
-import { MenuCategory } from '@/types';
+import { MenuCategory, MenuItem as MenuItemType } from '@/types';
 import { getMenuItemsByCategory } from '@/services/menu-service';
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState<MenuCategory>('all');
-  const featuredItems = getMenuItemsByCategory(activeCategory).slice(0, 4);
+  const [featuredItems, setFeaturedItems] = useState<MenuItemType[]>([]);
+  
+  useEffect(() => {
+    const fetchItems = async () => {
+      const items = await getMenuItemsByCategory(activeCategory);
+      setFeaturedItems(items.slice(0, 4));
+    };
+    
+    fetchItems();
+  }, [activeCategory]);
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
