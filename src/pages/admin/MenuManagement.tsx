@@ -2,14 +2,37 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Plus, Edit, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader2, X, Check, Image } from 'lucide-react';
 import { MenuCategory } from '@/types';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getMenuItemsByCategory, deleteMenuItem } from '@/services/menu-service';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { getMenuItemsByCategory, deleteMenuItem, addMenuItem, updateMenuItem } from '@/services/menu-service';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 const MenuManagement = () => {
   const [filter, setFilter] = useState<MenuCategory | ''>('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentItemId, setCurrentItemId] = useState<string | null>(null);
+  
+  // Form state
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [category, setCategory] = useState<MenuCategory>('main');
+  const [imageUrl, setImageUrl] = useState('');
+  
   const queryClient = useQueryClient();
   
   // Fetch menu items using React Query
@@ -26,21 +49,103 @@ const MenuManagement = () => {
     { value: 'desserts', label: 'الحلويات' },
   ];
 
+  // Add mutation
+  const addMutation = useMutation({
+    mutationFn: (newItem: { name: string; description: string; price: number; category: MenuCategory; image_url: string }) => 
+      addMenuItem(newItem),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+      toast.success('تم إضافة العنصر بنجاح');
+      resetForm();
+      setIsDialogOpen(false);
+    },
+    onError: (error) => {
+      console.error('Error adding item:', error);
+      toast.error('فشل إضافة العنصر');
+    }
+  });
+
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: ({ id, item }: { id: string; item: { name: string; description: string; price: number; category: MenuCategory; image_url: string } }) => 
+      updateMenuItem(id, item),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+      toast.success('تم تحديث العنصر بنجاح');
+      resetForm();
+      setIsDialogOpen(false);
+    },
+    onError: (error) => {
+      console.error('Error updating item:', error);
+      toast.error('فشل تحديث العنصر');
+    }
+  });
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteMenuItem(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+      toast.success('تم حذف العنصر بنجاح');
+    },
+    onError: (error) => {
+      console.error('Error deleting item:', error);
+      toast.error('فشل حذف العنصر');
+    }
+  });
+
   // Function to handle menu item deletion
-  const handleDeleteItem = async (id: string) => {
+  const handleDeleteItem = (id: string) => {
     if (window.confirm('هل أنت متأكد من رغبتك في حذف هذا العنصر؟')) {
-      try {
-        const success = await deleteMenuItem(id);
-        if (success) {
-          toast.success('تم حذف العنصر بنجاح');
-          queryClient.invalidateQueries({ queryKey: ['menuItems'] });
-        } else {
-          toast.error('فشل حذف العنصر');
-        }
-      } catch (error) {
-        console.error('Error deleting item:', error);
-        toast.error('حدث خطأ أثناء محاولة حذف العنصر');
-      }
+      deleteMutation.mutate(id);
+    }
+  };
+
+  // Function to open dialog for editing
+  const handleEditItem = (item: any) => {
+    setIsEditing(true);
+    setCurrentItemId(item.id);
+    setName(item.name);
+    setDescription(item.description);
+    setPrice(item.price.toString());
+    setCategory(item.category as MenuCategory);
+    setImageUrl(item.image_url);
+    setIsDialogOpen(true);
+  };
+
+  // Function to open dialog for adding
+  const handleAddItem = () => {
+    resetForm();
+    setIsEditing(false);
+    setCurrentItemId(null);
+    setIsDialogOpen(true);
+  };
+
+  // Reset form
+  const resetForm = () => {
+    setName('');
+    setDescription('');
+    setPrice('');
+    setCategory('main');
+    setImageUrl('/images/menu/placeholder.jpg');
+  };
+
+  // Submit handler
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const itemData = {
+      name,
+      description,
+      price: parseFloat(price),
+      category,
+      image_url: imageUrl || '/images/menu/placeholder.jpg'
+    };
+
+    if (isEditing && currentItemId) {
+      updateMutation.mutate({ id: currentItemId, item: itemData });
+    } else {
+      addMutation.mutate(itemData);
     }
   };
 
@@ -52,7 +157,10 @@ const MenuManagement = () => {
           <p className="text-gray-500">إضافة وتعديل وإزالة عناصر القائمة</p>
         </div>
         
-        <Button className="bg-restaurant-primary hover:bg-restaurant-primary/90 mt-2 sm:mt-0">
+        <Button 
+          className="bg-restaurant-primary hover:bg-restaurant-primary/90 mt-2 sm:mt-0"
+          onClick={handleAddItem}
+        >
           <Plus size={18} className="ml-2" />
           إضافة عنصر جديد
         </Button>
@@ -73,10 +181,10 @@ const MenuManagement = () => {
         </select>
         
         <div className="flex-1 max-w-md">
-          <input 
+          <Input
             type="text" 
             placeholder="ابحث في عناصر القائمة..."
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-restaurant-primary"
+            className="w-full"
           />
         </div>
       </div>
@@ -140,14 +248,19 @@ const MenuManagement = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                        {item.category}
+                        {categories.find(cat => cat.value === item.category)?.label || item.category}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      ${item.price.toFixed(2)}
+                      {item.price.toFixed(2)} ريال
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
-                      <Button variant="ghost" size="icon" className="text-blue-600 hover:text-blue-900">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="text-blue-600 hover:text-blue-900"
+                        onClick={() => handleEditItem(item)}
+                      >
                         <Edit size={16} />
                       </Button>
                       <Button 
@@ -172,6 +285,100 @@ const MenuManagement = () => {
           )}
         </Card>
       )}
+
+      {/* Add/Edit Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent dir="rtl" className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{isEditing ? 'تعديل عنصر القائمة' : 'إضافة عنصر جديد'}</DialogTitle>
+            <DialogDescription>
+              أدخل معلومات العنصر الجديد هنا. اضغط حفظ عند الانتهاء.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">اسم العنصر</Label>
+              <Input 
+                id="name" 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+                placeholder="أدخل اسم العنصر"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">الوصف</Label>
+              <Textarea 
+                id="description" 
+                value={description} 
+                onChange={(e) => setDescription(e.target.value)} 
+                placeholder="أدخل وصف العنصر"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="price">السعر</Label>
+                <Input 
+                  id="price" 
+                  type="number" 
+                  min="0" 
+                  step="0.01" 
+                  value={price} 
+                  onChange={(e) => setPrice(e.target.value)} 
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="category">الفئة</Label>
+                <select
+                  id="category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as MenuCategory)}
+                  className="w-full p-2 border rounded-md"
+                  required
+                >
+                  <option value="starters">المقبلات</option>
+                  <option value="main">الأطباق الرئيسية</option>
+                  <option value="drinks">المشروبات</option>
+                  <option value="desserts">الحلويات</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="imageUrl">رابط الصورة</Label>
+              <Input 
+                id="imageUrl" 
+                value={imageUrl} 
+                onChange={(e) => setImageUrl(e.target.value)} 
+                placeholder="أدخل رابط الصورة"
+              />
+              <div className="text-xs text-gray-500">
+                اترك هذا الحقل فارغاً لاستخدام الصورة الافتراضية
+              </div>
+            </div>
+
+            <DialogFooter className="pt-4">
+              <Button variant="outline" type="button" onClick={() => setIsDialogOpen(false)}>
+                إلغاء
+              </Button>
+              <Button type="submit" disabled={addMutation.isPending || updateMutation.isPending}>
+                {(addMutation.isPending || updateMutation.isPending) ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>{isEditing ? 'تحديث' : 'إضافة'}</>
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

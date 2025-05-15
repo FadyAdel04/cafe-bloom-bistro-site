@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import CategoryFilter from '@/components/menu/CategoryFilter';
 import MenuItem from '@/components/menu/MenuItem';
 import { MenuCategory } from '@/types';
