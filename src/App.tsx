@@ -15,6 +15,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import Index from "./pages/Index";
 import Menu from "./pages/Menu";
 import Auth from "./pages/Auth";
+import UserProfile from "./pages/UserProfile";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import MenuManagement from "./pages/admin/MenuManagement";
@@ -24,13 +25,26 @@ import { useAuth } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
-// Protected route component
+// Protected route component for admin pages
 const RequireAdmin = ({ children }: { children: React.ReactNode }) => {
   const { user, isAdmin, loading } = useAuth();
   
   if (loading) return <div className="h-screen flex items-center justify-center">جاري التحميل...</div>;
   
   if (!user || !isAdmin) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+// Protected route component for authenticated users
+const RequireAuth = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) return <div className="h-screen flex items-center justify-center">جاري التحميل...</div>;
+  
+  if (!user) {
     return <Navigate to="/auth" replace />;
   }
   
@@ -75,6 +89,18 @@ const AppRoutes = () => {
             <Auth />
             <Footer />
           </>
+        }
+      />
+      
+      {/* User Profile Route */}
+      <Route
+        path="/profile"
+        element={
+          <RequireAuth>
+            <Header />
+            <UserProfile />
+            <Footer />
+          </RequireAuth>
         }
       />
       

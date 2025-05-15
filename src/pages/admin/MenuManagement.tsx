@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Plus, Edit, Trash2, Loader2, X, Check, Image } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader2 } from 'lucide-react';
 import { MenuCategory } from '@/types';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { getMenuItemsByCategory, deleteMenuItem, addMenuItem, updateMenuItem } from '@/services/menu-service';
@@ -14,11 +13,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import ImageUpload from '@/components/admin/ImageUpload';
 
 const MenuManagement = () => {
   const [filter, setFilter] = useState<MenuCategory | ''>('');
@@ -127,7 +126,7 @@ const MenuManagement = () => {
     setDescription('');
     setPrice('');
     setCategory('main');
-    setImageUrl('/images/menu/placeholder.jpg');
+    setImageUrl('');
   };
 
   // Submit handler
@@ -352,16 +351,11 @@ const MenuManagement = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="imageUrl">رابط الصورة</Label>
-              <Input 
-                id="imageUrl" 
+              <Label htmlFor="imageUpload">صورة العنصر</Label>
+              <ImageUpload 
                 value={imageUrl} 
-                onChange={(e) => setImageUrl(e.target.value)} 
-                placeholder="أدخل رابط الصورة"
+                onChange={setImageUrl}
               />
-              <div className="text-xs text-gray-500">
-                اترك هذا الحقل فارغاً لاستخدام الصورة الافتراضية
-              </div>
             </div>
 
             <DialogFooter className="pt-4">

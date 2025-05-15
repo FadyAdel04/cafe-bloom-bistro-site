@@ -8,7 +8,6 @@ const ADMIN_PASSWORD = "admin123";
 export interface AuthUser {
   id: string;
   email: string;
-  isAdmin: boolean;
 }
 
 let currentUser: AuthUser | null = null;
@@ -20,8 +19,7 @@ export async function signIn(email: string, password: string): Promise<{ user: A
     if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
       currentUser = {
         id: 'admin-id',
-        email: ADMIN_EMAIL,
-        isAdmin: true
+        email: ADMIN_EMAIL
       };
       localStorage.setItem('authUser', JSON.stringify(currentUser));
       return { user: currentUser, error: null };
@@ -40,8 +38,7 @@ export async function signIn(email: string, password: string): Promise<{ user: A
     if (data.user) {
       currentUser = {
         id: data.user.id,
-        email: data.user.email || '',
-        isAdmin: false
+        email: data.user.email || ''
       };
       localStorage.setItem('authUser', JSON.stringify(currentUser));
       return { user: currentUser, error: null };
@@ -107,10 +104,4 @@ export function getCurrentUser(): AuthUser | null {
   }
   
   return null;
-}
-
-// Check if user is admin
-export function isAdmin(): boolean {
-  const user = getCurrentUser();
-  return user?.isAdmin || false;
 }
