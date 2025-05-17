@@ -25,7 +25,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ item }) => {
         <div className="flex justify-between items-start">
           <h3 className="text-lg font-semibold text-restaurant-secondary">{item.name}</h3>
           <span className="bg-restaurant-primary text-white px-2 py-1 rounded-full text-sm font-medium">
-            ${item.price.toFixed(2)}
+            E£{item.price.toFixed(2)}
           </span>
         </div>
         <p className="text-gray-600 mt-2 text-sm line-clamp-2">{item.description}</p>

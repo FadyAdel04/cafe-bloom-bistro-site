@@ -90,7 +90,7 @@ const CartDrawer = () => {
                       </Button>
                     </div>
                     
-                    <p className="text-gray-500 text-sm mt-1">${item.price.toFixed(2)}</p>
+                    <p className="text-gray-500 text-sm mt-1">E£{item.price.toFixed(2)}</p>
                     
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center border rounded">
@@ -113,7 +113,7 @@ const CartDrawer = () => {
                         </Button>
                       </div>
                       <span className="font-semibold">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        E£{(item.price * item.quantity).toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -127,7 +127,7 @@ const CartDrawer = () => {
           <div className="border-t p-4 space-y-4">
             <div className="flex justify-between text-lg font-semibold">
               <span>Total:</span>
-              <span>${getTotalPrice().toFixed(2)}</span>
+              <span>E£{getTotalPrice().toFixed(2)}</span>
             </div>
             
             <Button 
