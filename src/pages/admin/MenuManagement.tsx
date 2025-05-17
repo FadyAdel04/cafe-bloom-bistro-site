@@ -10,9 +10,9 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -251,7 +251,7 @@ const MenuManagement = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {item.price.toFixed(2)} ريال
+                      {item.price.toFixed(2)} جنيه
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
                       <Button 
@@ -287,90 +287,102 @@ const MenuManagement = () => {
 
       {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent dir="rtl" className="sm:max-w-[425px]">
-          <DialogHeader>
+        <DialogContent dir="rtl" className="sm:max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader className="border-b">
             <DialogTitle>{isEditing ? 'تعديل عنصر القائمة' : 'إضافة عنصر جديد'}</DialogTitle>
             <DialogDescription>
               أدخل معلومات العنصر الجديد هنا. اضغط حفظ عند الانتهاء.
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">اسم العنصر</Label>
-              <Input 
-                id="name" 
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-                placeholder="أدخل اسم العنصر"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">الوصف</Label>
-              <Textarea 
-                id="description" 
-                value={description} 
-                onChange={(e) => setDescription(e.target.value)} 
-                placeholder="أدخل وصف العنصر"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
+          <div className="overflow-y-auto p-6 flex-1">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="price">السعر</Label>
+                <Label htmlFor="name">اسم العنصر</Label>
                 <Input 
-                  id="price" 
-                  type="number" 
-                  min="0" 
-                  step="0.01" 
-                  value={price} 
-                  onChange={(e) => setPrice(e.target.value)} 
-                  placeholder="0.00"
+                  id="name" 
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)} 
+                  placeholder="أدخل اسم العنصر"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category">الفئة</Label>
-                <select
-                  id="category"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as MenuCategory)}
-                  className="w-full p-2 border rounded-md"
+                <Label htmlFor="description">الوصف</Label>
+                <Textarea 
+                  id="description" 
+                  value={description} 
+                  onChange={(e) => setDescription(e.target.value)} 
+                  placeholder="أدخل وصف العنصر"
                   required
-                >
-                  <option value="starters">المقبلات</option>
-                  <option value="main">الأطباق الرئيسية</option>
-                  <option value="drinks">المشروبات</option>
-                  <option value="desserts">الحلويات</option>
-                </select>
+                  rows={4}
+                />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="imageUpload">صورة العنصر</Label>
-              <ImageUpload 
-                value={imageUrl} 
-                onChange={setImageUrl}
-              />
-            </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price">السعر</Label>
+                  <Input 
+                    id="price" 
+                    type="number" 
+                    min="0" 
+                    step="0.01" 
+                    value={price} 
+                    onChange={(e) => setPrice(e.target.value)} 
+                    placeholder="0.00"
+                    required
+                  />
+                </div>
 
-            <DialogFooter className="pt-4">
-              <Button variant="outline" type="button" onClick={() => setIsDialogOpen(false)}>
-                إلغاء
-              </Button>
-              <Button type="submit" disabled={addMutation.isPending || updateMutation.isPending}>
-                {(addMutation.isPending || updateMutation.isPending) ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>{isEditing ? 'تحديث' : 'إضافة'}</>
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
+                <div className="space-y-2">
+                  <Label htmlFor="category">الفئة</Label>
+                  <select
+                    id="category"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value as MenuCategory)}
+                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-restaurant-primary"
+                    required
+                  >
+                    <option value="starters">المقبلات</option>
+                    <option value="main">الأطباق الرئيسية</option>
+                    <option value="drinks">المشروبات</option>
+                    <option value="desserts">الحلويات</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="imageUpload">صورة العنصر</Label>
+                <ImageUpload 
+                  value={imageUrl} 
+                  onChange={setImageUrl}
+                />
+              </div>
+            </form>
+          </div>
+
+          <DialogFooter className="border-t p-4">
+            <Button 
+              variant="outline" 
+              type="button" 
+              onClick={() => setIsDialogOpen(false)}
+              className="ml-2"
+            >
+              إلغاء
+            </Button>
+            <Button 
+              type="submit" 
+              onClick={handleSubmit}
+              disabled={addMutation.isPending || updateMutation.isPending}
+            >
+              {(addMutation.isPending || updateMutation.isPending) ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>{isEditing ? 'تحديث' : 'إضافة'}</>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

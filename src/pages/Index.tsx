@@ -6,6 +6,10 @@ import CategoryFilter from '@/components/menu/CategoryFilter';
 import MenuItem from '@/components/menu/MenuItem';
 import { MenuCategory, MenuItem as MenuItemType } from '@/types';
 import { getMenuItemsByCategory } from '@/services/menu-service';
+
+import hero from "../../public/images/hero.jfif"
+import about from "../../public/images/about.jfif"
+
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState<MenuCategory>('all');
   const [featuredItems, setFeaturedItems] = useState<MenuItemType[]>([]);
@@ -28,7 +32,7 @@ const Index = () => {
       {/* Hero Section */}
       <section className="relative h-screen flex items-center" dir="rtl">
         <div className="absolute inset-0 z-0">
-          <img src="/images/hero-bg.jpg" alt="صورة الغلاف" className="w-full h-full object-cover" />
+          <img src={hero} alt="صورة الغلاف" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black bg-opacity-50"></div>
         </div>
         
@@ -46,7 +50,7 @@ const Index = () => {
                 اطلب الآن
               </Button>
               <Link to="/menu">
-                <Button variant="outline" className="border-white text-white hover:bg-white hover:text-restaurant-secondary" size="lg">
+                <Button variant="outline" className="border-white text-black hover:bg-white hover:text-restaurant-secondary" size="lg">
                   تصفح القائمة كاملة
                 </Button>
               </Link>
@@ -83,7 +87,7 @@ const Index = () => {
         <div className="container-custom">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="rounded-lg overflow-hidden h-[400px]">
-              <img alt="من نحن" className="w-full h-full object-cover" src="/lovable-uploads/c78e1158-2f28-4ca7-8929-fb8442d77efa.jpg" />
+              <img alt="من نحن" className="w-70 h-full object-cover" src={about} />
             </div>
             <div>
               <h2 className="section-title">قصتنا</h2>

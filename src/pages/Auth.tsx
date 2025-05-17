@@ -151,7 +151,7 @@ const Auth = () => {
 
         {/* Admin login hint */}
         <div className="mt-6 pt-4 border-t text-center text-xs text-gray-500">
-          للدخول كمدير: admin@cafebloom.com / admin123
+          للدخول كمدير: admin@gmail.com / admin123
         </div>
       </Card>
     </div>

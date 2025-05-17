@@ -39,7 +39,7 @@ const AdminDashboard = () => {
     },
     {
       title: 'الإيرادات',
-      value: '1,240 ريال',
+      value: '1,240 جنيه',
       icon: DollarSign,
       color: 'bg-yellow-500',
     },
